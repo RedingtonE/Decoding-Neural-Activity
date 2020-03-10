@@ -31,47 +31,29 @@ import nelpy.plotting as npl
 npl.setup()
 from nelpy.hmmutils import PoissonHMM
 
-os.chdir('C://Users//neurotoolbox//Documents//HMMtest//')
+
 #Read data in from MATLAB. Needs to be saved with option 'v7.3' to be correctly read in
-f = h5py.File('hmmtest_c27_1NRE_separateepochs.mat', 'r')
+notebook_path = os.getcwd()
+matPath = r'C:\Users\Emmy\Documents\GitHub\Decoding-neural-activity\data\exampledata_c27_2NRE.mat'
+f = h5py.File( matPath, 'r')
 trandat = f['hmmtestspikesmooth']
 timeDat =  f['microscopeTime']
 posDat = f['microscopeLocation']
-etDat = f['epochst']
-ntDat = f['epochsnt']
-alldat = f['allepoch']
-pDat = f['placecells']
-pcells = np.array(pDat[()])
 fulldat = np.array(trandat[()])
-mTime = np.array(timeDat[()])
-mPos = np.array(posDat[()])
-epochst = np.array(etDat[()])
-epochsnt = np.array(ntDat[()])
-allepochs = np.array(alldat[()])
+mTime = timeDat[()]
+mPos = posDat[()]
+
 f.close()
 #Conver data to formats that nelpy can use
-pcells = list(pcells[0])
-tlist = [[] for _ in np.arange(0,np.size(epochst, 0))]
-ntlist = [[] for _ in np.arange(0,np.size(epochsnt, 0))]
-alllist = [[] for _ in np.arange(0,np.size(allepochs, 0))]
-tind = np.arange(0, np.size(epochst, 0))
-for time in tind:
-    tlist[time] = list(epochst[time, :])
-    
-for time  in np.arange(0, np.size(epochsnt, 0)):
-    ntlist[time] = list(epochsnt[time, :])
-    
-for time  in np.arange(0, np.size(allepochs, 0)):
-    alllist[time] = list(allepochs[time, :])
-    
-cind = np.arange(0, np.size(fulldat, 0))
-session_bounds = nel.EpochArray(alllist)
-pos = nel.AnalogSignalArray(np.array(mPos), timestamps=np.array(mTime), support=(session_bounds), fs=20)
 
+cind = np.arange(0, np.size(fulldat, 0))
 slist = [[] for _ in np.arange(0,np.size(fulldat, 0))]
 for cell in cind:
-    a = list(np.array(np.where(fulldat[cell, :] == 1))[0])
-    slist[cell] = list(mTime[0][a])
+    slist[cell] = list(np.array(np.where(fulldat[cell, :] == 1))[0])
+
+bins = np.arange(0, 270, 3)*(300/270)
+
+histcount = np.histogram(mPos[0,slist[1]], bins)
 
 #Create spike trains for all cells, selected subsets of cells, and selected epochs
 st = nel.SpikeTrainArray(slist, support=session_bounds, fs=20)
